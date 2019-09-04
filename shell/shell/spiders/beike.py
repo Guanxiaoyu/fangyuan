@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from items import FangjiaItem
+#from items import FangjiaItem
 
 headers = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'}
 
-class fangjiaSpider(scrapy.Spider):
-    name = "fangjia"
+class shellSpider(scrapy.Spider):
+    name = "beike"
     allowed_domins = ["https://bj.zu.ke.com/zufang"]
     start_urls = []
 
@@ -42,5 +42,5 @@ class fangjiaSpider(scrapy.Spider):
 if __name__ == '__main__':
     from scrapy import cmdline
 
-    cmdline.execute('scrapy crawl fangjia'.split())
+    cmdline.execute('scrapy crawl beike'.split())
 
