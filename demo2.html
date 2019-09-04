@@ -1,3 +1,21 @@
+Skip to content
+ 
+Search or jump to…
+
+Pull requests
+Issues
+Marketplace
+Explore
+ 
+@Guanxiaoyu 
+12
+88 34 happyte/buyhouse
+ Code  Issues 3  Pull requests 0  Projects 0  Wiki  Security  Insights
+buyhouse/demo.html
+@Zs511129 Zs511129 提交所有代码
+c76f218 on 27 Dec 2016
+244 lines (217 sloc)  7.54 KB
+    
 <!doctype html>
 <html>
 
@@ -5,7 +23,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <title>北京房源</title>
+    <title>毕业生买房</title>
     <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css" />
     <link rel="stylesheet" href="http://cache.amap.com/lbs/static/jquery.range.css" />
     <script src="http://cache.amap.com/lbs/static/jquery-1.9.1.js"></script>
@@ -18,7 +36,6 @@
             top: 30px;
             right: 20px;
         }
-
         .control-entry {
             width: 280px;
             background-color: rgba(119, 136, 153, 0.8);
@@ -29,20 +46,16 @@
             padding: 10px;
             margin-bottom: 10px;
         }
-
         .control-input {
             margin-left: 120px;
         }
-
         .control-input input[type="text"] {
             width: 160px;
         }
-
         .control-panel label {
             float: left;
             width: 120px;
         }
-
         #transfer-panel {
             position: absolute;
             background-color: white;
@@ -59,7 +72,7 @@
 <div id="container"></div>
 <div class="control-panel">
     <div class="control-entry">
-        <label>中心点：</label>
+        <label>选择工作地点：</label>
         <div class="control-input">
             <input id="work-location" type="text">
         </div>
@@ -81,62 +94,50 @@
 <div id="transfer-panel"></div>
 <script>
     var map = new AMap.Map("container", {
-        resizeEnable: true,//是否监控地图容器尺寸变化
+        resizeEnable: true,
         zoomEnable: true,
-        center: [116.38, 39.90],//初始化地图中心点
-        zoom: 11//初始化地图层级
+        center: [104.06, 30.67],
+        zoom: 11
     });
-    var scale = new AMap.Scale();//加入比例尺
+    var scale = new AMap.Scale();
     map.addControl(scale);
-
-    var arrivalRange = new AMap.ArrivalRange();//AMap.ArrivalRange根据输入的起点坐标和设定的时间范围，可以计算出用户在你设定的时间段内按公交出行方式，可以到达的距离范围。
+    var arrivalRange = new AMap.ArrivalRange();
     var x, y, t, vehicle = "SUBWAY,BUS";
     var workAddress, workMarker;
     var rentMarkerArray = [];
     var polygonArray = [];
     var amapTransfer;
-
     var infoWindow = new AMap.InfoWindow({
-        offset: new AMap.Pixel(0, -30)//像素偏移
+        offset: new AMap.Pixel(0, -30)
     });
-
     var auto = new AMap.Autocomplete({
         input: "work-location"
     });
     AMap.event.addListener(auto, "select", workLocationSelected);
-
-
     function takeBus(radio) {
         vehicle = radio.value;
         loadWorkLocation()
     }
-
     function takeSubway(radio) {
         vehicle = radio.value;
         loadWorkLocation()
     }
-
     function importRentInfo(fileInfo) {
         var file = fileInfo.files[0].name;
         loadRentLocationByFile(file);
     }
-
     function workLocationSelected(e) {
         workAddress = e.poi.name;
         loadWorkLocation();
     }
-
     function loadWorkMarker(x, y, locationName) {
         workMarker = new AMap.Marker({
             map: map,
             title: locationName,
             icon: 'http://webapi.amap.com/theme/v1.3/markers/n/mark_r.png',
             position: [x, y]
-
         });
     }
-
-
     function loadWorkRange(x, y, t, color, v) {
         arrivalRange.search([x, y], t, function(status, result) {
             if (result.bounds) {
@@ -157,11 +158,10 @@
             policy: v
         });
     }
-
     function addMarkerByAddress(address) {
         var geocoder = new AMap.Geocoder({
-            city: "北京",
-            radius: 1000////以已知坐标为中心点，radius为半径，返回范围内兴趣点和道路信息
+            city: "成都",
+            radius: 1000
         });
         geocoder.getLocation(address, function(status, result) {
             if (status === "complete" && result.info === 'OK') {
@@ -173,7 +173,6 @@
                     position: [geocode.location.getLng(), geocode.location.getLat()]
                 });
                 rentMarkerArray.push(rentMarker);
-
                 rentMarker.content = "<div>房源：<a target = '_blank' href='http://cd.fang.lianjia.com/loupan/?key=" + address + "'>" + address + "</a><div>"
                 rentMarker.on('click', function(e) {
                     infoWindow.setContent(e.target.content);
@@ -182,7 +181,7 @@
                     amapTransfer = new AMap.Transfer({
                         map: map,
                         policy: AMap.TransferPolicy.LEAST_TIME,
-                        city: "北京市",
+                        city: "成都市",
                         panel: 'transfer-panel'
                     });
                     amapTransfer.search([{
@@ -194,25 +193,21 @@
             }
         })
     }
-
     function delWorkLocation() {
         if (polygonArray) map.remove(polygonArray);
         if (workMarker) map.remove(workMarker);
         polygonArray = [];
     }
-
     function delRentLocation() {
         if (rentMarkerArray) map.remove(rentMarkerArray);
         rentMarkerArray = [];
     }
-
     function loadWorkLocation() {
         delWorkLocation();
         var geocoder = new AMap.Geocoder({
-            city: "北京",
+            city: "成都",
             radius: 1000
         });
-
         geocoder.getLocation(workAddress, function(status, result) {
             if (status === "complete" && result.info === 'OK') {
                 var geocode = result.geocodes[0];
@@ -224,7 +219,6 @@
             }
         })
     }
-
     function loadRentLocationByFile(fileName) {
         delRentLocation();
         var rent_locations = new Set();

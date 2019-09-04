@@ -6,17 +6,32 @@ headers = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWe
 
 class fangjiaSpider(scrapy.Spider):
     name = "fangjia"
-    allowed_domins = ["https://bj.zu.ke.com/zufang"]
+    allowed_domins = ["http://cd.fang.lianjia.com/"]
     start_urls = []
 
     def start_requests(self):
-        for i in range(1,101):
-            url = 'https://bj.zu.ke.com/zufang/pg{0}/#contentList'.format(i)
+        global headers
+        urlhead = 'http://cd.fang.lianjia.com/loupan/'
+        for i in range(18):
+            url = urlhead+'pg%snht1' % i
             self.start_urls.append(url)
+        for url in self.start_urls:
+            print (url)
             yield scrapy.Request(url, headers=headers, callback=self.parse)
 
     def parse(self, response):
-        fang_links = response.xpath('//div[@class="list-wrap"]/ul[@id="house-lst"]/li/div[@class="pic-panel"]/a/@href').extract()
+        item = FangjiaItem()
+        fang_links = response.xpath('//div[@class="content__list--item xh-highlight"]')
+        for i in fang_links:
+            title = i.xpath('//p[@class="content__list--item--title twoline"]').extract()[0]
+            url = i.xpath('//p[@class="content__list--item--title twoline"/a/@href]').extract()[0] #需要域名
+            attribute = i.xpath('//p[@class="content__list--item--des"]').extract()[0]#应该取出所有字段
+            attribute2 = i.xpath('//p[@class="content__list--item--time oneline"]').extract()[0]
+            attribute += '/'+attribute2
+            price = i.xpath('//span[@class="content__list--item-price"]').extract()[0]
+            if '独栋' in title:
+                yield scrapy.Request(url, headers=headers, callback=self.parse_fangjia)
+
         if fang_links:
             for fang_link in fang_links:
                 url = 'http://cd.fang.lianjia.com'+fang_link
@@ -36,6 +51,5 @@ class fangjiaSpider(scrapy.Spider):
         print (item['FANGJIA_ADDRESS'])
         print (item['FANGJIA_PRICE'])
         print (item['FANGJIA_URL'])
-        print(item['FANGJIA_ATTRIBUTE'])
         yield item
 
