@@ -158,7 +158,7 @@
         });
     }
 
-    function addMarkerByAddress(address,url_url) {
+    function addMarkerByAddress(address,f_name,f_url,f_price,f_attribute) {
         var geocoder = new AMap.Geocoder({
             city: "北京",
             radius: 1000////以已知坐标为中心点，radius为半径，返回范围内兴趣点和道路信息
@@ -175,7 +175,7 @@
                 rentMarkerArray.push(rentMarker);
 
                 //rentMarker.content = "<div>房源：<a target = '_blank' href='http://cd.fang.lianjia.com/loupan/?key=" + address + "'>" + address + "</a><div>"
-                rentMarker.content = "<div>房源：<a target = '_blank' href='https://www.baidu.com'>guanyu<br>"+address+"</a><div>"+"<div>url：<a target = '_blank' href='https://www.baidu.com'>guanyu<br>"+url_url+"</a><div>"
+                rentMarker.content = "<div>房源：<a target = '_blank' href='"+f_url+"'>"+f_name+"</a><div>"+"<div>属性：<a>"+f_attribute+"</a><div>"+"<div>价格：<a>"+f_price+"</a><div>"
                 rentMarker.on('click', function(e) {
                     infoWindow.setContent(e.target.content);
                     infoWindow.open(map, e.target.getPosition());
@@ -235,9 +235,13 @@
                 rent_locations.add(item);
             });
             rent_locations.forEach(function(element, index) {
-                address=element.split(",")[1];
-                url_url=element.split(",")[2];
-                addMarkerByAddress(address,url_url);
+                address=element.split(",")[0];
+                f_name=element.split(",")[2];
+                f_url = element.split(",")[4];
+                f_price=element.split(",")[3];
+                f_attribute = element.split(",")[1];
+
+                addMarkerByAddress(address,f_name,f_url,f_price,f_attribute);
             });
         });
     }

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 import scrapy
-#from items import FangjiaItem
+from shell.items import ShellItem
+import requests
+#from urllib.parse import urljoin
 
 headers = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'}
 
 class shellSpider(scrapy.Spider):
     name = "beike"
-    allowed_domins = ["https://bj.zu.ke.com/zufang"]
+    allowed_domins = ["https://bj.zu.ke.com/"]
     start_urls = []
 
     def start_requests(self):
@@ -16,31 +18,44 @@ class shellSpider(scrapy.Spider):
             yield scrapy.Request(url, headers=headers, callback=self.parse)
 
     def parse(self, response):
-        fang_links = response.xpath('//div[@class="list-wrap"]/ul[@id="house-lst"]/li/div[@class="pic-panel"]/a/@href').extract()
+        item = ShellItem()
+        fang_links = response.xpath('//div[@class="content__list--item--main"]')
         if fang_links:
             for fang_link in fang_links:
-                url = 'http://cd.fang.lianjia.com'+fang_link
-                yield scrapy.Request(url, headers=headers, callback=self.parse_fangjia)
+                #房源链接
+                link_url = response.urljoin(fang_link.xpath('p[@class="content__list--item--title twoline"]//a/@href').extract_first())
+                #名称
+                name = fang_link.xpath('p[@class="content__list--item--title twoline"]//a/text()').extract_first().replace('\n','').replace(' ','')
+                #属性
+                attribute = fang_link.xpath('p[@class="content__list--item--des"]//text()').extract()
+                attribute=''.join(attribute).replace('\n','').replace(' ','')
+                #价格
+                price = fang_link.xpath('span[@class="content__list--item-price"]//text()').extract()
+                price=''.join(price).replace('\n','').replace(' ','')
+                #地址
+                if '独栋' in name:
+                    selector =scrapy.Selector(text=requests.get(link_url,headers=headers).text)
+                    address=selector.xpath('//p[@class="flat__info--title online"]//text()').extract_first().replace('\n','').replace(' ','')
+                else:
+                    address=attribute[:attribute.index('/')]
 
-    def parse_fangjia(self, response):   # /是在根节点找(只找根节点下面一层,绝对) //是在根节点下面的所有节点找,相对
-        item = FangjiaItem()
-        name = response.xpath('//div[@class="name-box"]/a/@title').extract()[0]
-        url = response.xpath('//div[@class="name-box"]/a/@href').extract()[0]
-        price = response.xpath('//p[@class="jiage"]/span[@class="junjia"]/text()').extract()[0]
-        address = response.xpath('//p[@class="where"]/span/@title').extract()[0]
-        item['FANGJIA_NAME'] = name
-        item['FANGJIA_ADDRESS'] = address
-        item['FANGJIA_PRICE'] = price
-        item['FANGJIA_URL'] = 'http://cd.fang.lianjia.com'+url
-        print (item['FANGJIA_NAME'])
-        print (item['FANGJIA_ADDRESS'])
-        print (item['FANGJIA_PRICE'])
-        print (item['FANGJIA_URL'])
-        print(item['FANGJIA_ATTRIBUTE'])
-        yield item
+                item['address'] = address
+                item['name'] = name
+                item['url'] = link_url
+                item['price'] = price
+                item['attribute'] = attribute
+
+                print(item['address'])
+                print(item['name'])
+                print(item['url'])
+                print(item['price'])
+                print(item['attribute'])
+                yield item
+
 
 if __name__ == '__main__':
     from scrapy import cmdline
 
-    cmdline.execute('scrapy crawl beike'.split())
+    cmdline.execute('scrapy crawl beike -o beijing.csv '.split())
+    #cmdline.execute('scrapy crawl beike'.split())
 
