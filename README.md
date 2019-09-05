@@ -1,5 +1,5 @@
 
-## 基于python的scrapy爬虫，爬取贝壳网成都地区新房源，并用高德api在地图上可视化显示
+## 基于python的scrapy爬虫，爬取贝壳网北京地区新房源，并用高德api在地图上可视化显示
 
 - 1.效果图如下(借用https://github.com/happyte/buyhouse)
 ![image](https://github.com/happyte/buyhouse/blob/master/1.png)
